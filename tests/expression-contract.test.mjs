@@ -79,7 +79,7 @@ test('镜像使用基础属性值而不是当前表达式帧结果', () => {
 test('面板显示版本号和构建号', () => {
   const panel = fs.readFileSync(new URL('../client/panel.js', import.meta.url), 'utf8');
   const html = fs.readFileSync(new URL('../client/index.html', import.meta.url), 'utf8');
-  assert.match(panel, /VERSION = 'v1\.4\.1'/);
+  assert.match(panel, /VERSION = 'v1\.4\.2'/);
   assert.match(panel, /BUILD = 'basic-github-auto-update'/);
   assert.match(html, /version-badge/);
 });
