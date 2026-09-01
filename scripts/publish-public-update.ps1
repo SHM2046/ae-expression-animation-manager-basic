@@ -11,9 +11,12 @@ $sourceRoot = Split-Path -Parent $PSScriptRoot
 $packageJson = Get-Content -LiteralPath (Join-Path $sourceRoot 'package.json') -Raw | ConvertFrom-Json
 if (-not $Version) { $Version = [string]$packageJson.version }
 
-& (Join-Path $PSScriptRoot 'build-release-package.ps1') -Version $Version
-if ($LASTEXITCODE -ne 0) { throw '打包失败。' }
 $zip = Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'releases') -Filter "AEExpressionAnimationManager-Basic-v$Version.zip" -File | Select-Object -First 1
+if (-not $zip) {
+    & (Join-Path $PSScriptRoot 'build-release-package.ps1') -Version $Version
+    if ($LASTEXITCODE -ne 0) { throw '打包失败。' }
+    $zip = Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'releases') -Filter "AEExpressionAnimationManager-Basic-v$Version.zip" -File | Select-Object -First 1
+}
 if (-not $zip) { throw '未找到发布 ZIP。' }
 $checksum = (Get-FileHash -LiteralPath $zip.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
 $releaseTag = "v$Version"
