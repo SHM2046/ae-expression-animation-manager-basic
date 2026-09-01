@@ -79,9 +79,16 @@ test('镜像使用基础属性值而不是当前表达式帧结果', () => {
 test('面板显示版本号和构建号', () => {
   const panel = fs.readFileSync(new URL('../client/panel.js', import.meta.url), 'utf8');
   const html = fs.readFileSync(new URL('../client/index.html', import.meta.url), 'utf8');
-  assert.match(panel, /VERSION = 'v1\.4\.2'/);
+  assert.match(panel, /VERSION = 'v1\.4\.3'/);
   assert.match(panel, /BUILD = 'basic-github-auto-update'/);
   assert.match(html, /version-badge/);
+});
+test('更新器在直连超时后会使用 Windows 系统代理重试', () => {
+  const updater = fs.readFileSync(new URL('../client/updater.js', import.meta.url), 'utf8');
+  assert.match(updater, /function getWithWindowsProxy/);
+  assert.match(updater, /GetSystemWebProxy/);
+  assert.match(updater, /直连失败：/);
+  assert.match(updater, /request\.setTimeout\(7000/);
 });
 test('可改名、存为全局，并且自动加载只跟随已管理合成', () => {
   const panel = fs.readFileSync(new URL('../client/panel.js', import.meta.url), 'utf8');

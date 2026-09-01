@@ -8,12 +8,42 @@
   function respond(done, value) { window.setTimeout(function () { done(value); }, 0); }
   function versionParts(value) { return String(value || '0').replace(/^v/, '').split('.').map(function (part) { return parseInt(part, 10) || 0; }); }
   function isNewer(remote, current) { var a = versionParts(remote), b = versionParts(current), i; for (i = 0; i < Math.max(a.length, b.length); i += 1) { if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0); } return false; }
+  function directGet(url, redirects, done) {
+    var settled = false;
+    var request = node.https.get(url, { headers: { 'User-Agent': 'AEAnimationManagerBasicUpdater', 'Cache-Control': 'no-cache' } }, function (res) {
+      if (settled) return;
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects < 5) { settled = true; directGet(res.headers.location, redirects + 1, done); return; }
+      if (res.statusCode !== 200) { settled = true; done(new Error('HTTP ' + res.statusCode)); return; }
+      var chunks = [];
+      res.on('data', function (chunk) { chunks.push(chunk); });
+      res.on('end', function () { if (!settled) { settled = true; done(null, Buffer.concat(chunks)); } });
+    });
+    request.setTimeout(7000, function () { request.destroy(new Error('直连超时')); });
+    request.on('error', function (error) { if (!settled) { settled = true; done(error); } });
+  }
+  function getWithWindowsProxy(url, done) {
+    var proxyScript = node.path.join(node.os.tmpdir(), 'AEAMBasic-system-proxy-' + Date.now() + '.ps1');
+    var script = '$ErrorActionPreference="Stop"\n' +
+      '[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12\n' +
+      '$client=New-Object Net.WebClient\n' +
+      '$proxy=[Net.WebRequest]::GetSystemWebProxy()\n' +
+      'if($proxy){$proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;$client.Proxy=$proxy}\n' +
+      '[Console]::Out.Write([Convert]::ToBase64String($client.DownloadData($args[0])))\n';
+    try { node.fs.writeFileSync(proxyScript, script, 'utf8'); } catch (writeError) { done(writeError); return; }
+    node.child.execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', proxyScript, url], { windowsHide: true, maxBuffer: 32 * 1024 * 1024 }, function (error, stdout, stderr) {
+      try { node.fs.unlinkSync(proxyScript); } catch (_) {}
+      if (error) { done(new Error((stderr || error.message || 'Windows 系统代理请求失败').trim())); return; }
+      try { done(null, Buffer.from(String(stdout).trim(), 'base64')); } catch (decodeError) { done(decodeError); }
+    });
+  }
   function get(url, redirects, done) {
-    node.https.get(url, { headers: { 'User-Agent': 'AEAnimationManagerBasicUpdater', 'Cache-Control': 'no-cache' } }, function (res) {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects < 5) { get(res.headers.location, redirects + 1, done); return; }
-      if (res.statusCode !== 200) { done(new Error('HTTP ' + res.statusCode)); return; }
-      var chunks = []; res.on('data', function (chunk) { chunks.push(chunk); }); res.on('end', function () { done(null, Buffer.concat(chunks)); });
-    }).on('error', done);
+    directGet(url, redirects, function (directError, data) {
+      if (!directError) { done(null, data); return; }
+      getWithWindowsProxy(url, function (proxyError, proxyData) {
+        if (!proxyError) { done(null, proxyData); return; }
+        done(new Error('直连失败：' + directError.message + '；Windows 代理重试失败：' + proxyError.message));
+      });
+    });
   }
   function readConfig(done) { node.fs.readFile(configPath, 'utf8', function (error, value) { if (error) { done(error); return; } try { done(null, JSON.parse(value)); } catch (parseError) { done(parseError); } }); }
   function cacheBust(url) { return url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now(); }

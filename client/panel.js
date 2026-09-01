@@ -1,7 +1,7 @@
 /* global __adobe_cep__ */
 (function () {
   'use strict';
-  const VERSION = 'v1.4.2';
+  const VERSION = 'v1.4.3';
   const BUILD = 'basic-github-auto-update';
   const SLOT_IDS = ['A', 'B'];
   const CONTROL_TYPES = ['position', 'rotation', 'scale'];
