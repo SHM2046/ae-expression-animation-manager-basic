@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemgr.animation.basic" ExtensionBundleVersion="1.4.3" ExtensionBundleName="AE 动画管理器（基础版）">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemgr.animation.basic" ExtensionBundleVersion="1.4.4" ExtensionBundleName="AE 动画管理器（基础版）">
   <ExtensionList>
-    <Extension Id="com.aemgr.animation.basic.panel" Version="1.4.3" />
+    <Extension Id="com.aemgr.animation.basic.panel" Version="1.4.4" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
