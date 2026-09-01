@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AE 动画管理器（基础版）</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div><strong>动画管理器（基础版）</strong><span class="cycle">2 秒 · 50 帧 · 多节奏循环</span><span id="version-badge" class="version-badge"></span></div>
+      <div class="view-row">
+        <label class="toggle compact"><input id="dual-window" type="checkbox"><i></i>双窗口动画编辑</label>
+        <label class="toggle compact"><input id="auto-load-managed" type="checkbox"><i></i>自动跟随已管理合成</label>
+        <label class="toggle compact"><input id="comp-lock" type="checkbox"><i></i>锁定当前槽位</label>
+      </div>
+    </header>
+    <section class="update-row" aria-label="插件更新">
+      <span id="update-status">更新：未检查</span>
+      <span class="stretch"></span>
+      <button id="check-update" title="从 GitHub 检查基础版更新">检查更新</button>
+      <button id="prepare-update" disabled title="下载更新；完全退出 AE 后将自动安装">下载并退出后安装</button>
+    </section>
+    <section class="toolbar">
+      <button id="add-selected" class="primary">添加动画（选中图层）</button>
+      <label class="toggle"><input id="show-children" type="checkbox"><i></i>显示合成子集动画</label>
+      <span class="stretch"></span>
+      <div class="preset-tools">
+        <select id="preset-list" title="选择动画参数预设"></select>
+        <button id="save-preset" title="把当前选中图层的动画参数保存为预设">存预设</button>
+        <button id="apply-preset" title="将选中预设应用到插件中选中的图层">用预设</button>
+        <button id="edit-preset" title="重命名或替换当前预设">编辑预设</button>
+        <button id="delete-preset" title="删除当前预设">删预设</button>
+        <button id="refresh-panel" title="手动刷新当前动画面板">刷新面板</button>
+        <button id="clear-cache" title="清除缩略图缓存">清缓存</button>
+      </div>
+    </section>
+    <section id="preset-editor" class="preset-editor" hidden>
+      <div class="preset-editor-main">
+        <label>预设名称<input id="preset-name-input" type="text"></label>
+        <div id="preset-param-preview" class="preset-param-preview"></div>
+      </div>
+      <div class="preset-editor-actions">
+        <button id="preset-replace" title="用当前选中图层参数替换此预设">用选中图层更新参数</button>
+        <button id="preset-save-edit">保存编辑</button>
+        <button id="preset-cancel-edit">取消</button>
+      </div>
+    </section>
+    <section class="filters" aria-label="属性筛选">
+      <button data-filter="all" class="selected">全部</button>
+      <button data-filter="position">位移</button>
+      <button data-filter="rotation">旋转</button>
+      <button data-filter="scale">缩放</button>
+      <button id="hide-mirror" title="隐藏镜像复制出来的图层">隐藏镜像</button>
+      <span class="stretch"></span>
+      <button id="refresh-visible-thumbs" title="刷新当前打开的动画面板缩略图">刷新缩略图</button>
+      <button id="mirror-selected" title="复制插件中选中的图层，并按合成 Y 轴左右镜像">镜像</button>
+      <button id="random-offset" title="对当前筛选的属性随机设置偏移">随机偏移</button>
+      <button id="even-offset" title="按图层序号均分 0–49 帧偏移">平均偏移</button>
+    </section>
+    <section id="notice" class="notice" hidden></section>
+    <div id="context-menu" class="context-menu" hidden></div>
+    <section id="slots" class="slot-grid"></section>
+  </main>
+  <template id="layer-template">
+    <article class="layer-card">
+      <div class="layer-head">
+        <div class="thumb">
+          <span></span>
+          <button class="remove-layer thumb-action" title="移除全部本插件控制">×</button>
+          <button class="refresh-thumb thumb-action" title="重新生成此图层缩略图">↻</button>
+        </div>
+        <div class="layer-title"><span class="index"></span><input class="layer-name-input" type="text" title="修改后会同步到 AE 时间轴图层名称"><small></small></div>
+        <div class="mirror-slot"></div>
+      </div>
+      <div class="control-list"></div>
+    </article>
+  </template>
+  <script src="updater.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "provider": "publicManifest",
+  "manifestUrl": "https://raw.githubusercontent.com/SHM2046/ae-expression-animation-manager-basic-updates/main/update-manifest.json",
+  "product": "AE 动画管理器（基础版）",
+  "extensionDirectory": "AEExpressionAnimationManagerBasic"
+}
